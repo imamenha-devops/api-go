@@ -1,33 +1,19 @@
-package main
+package handler
 
 import (
-	"log"
-	"os"
+	"net/http"
 
+	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
-func main() {
-	// DB connection string dari ENV Vercel (setting di Dashboard → Environment Variables)
-	dsn := os.Getenv("DATABASE_URL")
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database:", err)
-	}
+var app = fiber.New()
 
-	app := fiber.New()
-
+func init() {
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello from Go + Fiber + Vercel!")
+		return c.SendString("Hello from Fiber on Vercel!")
 	})
-
-	app.Get("/users", func(c *fiber.Ctx) error {
-		var users []map[string]interface{}
-		db.Raw("SELECT id, name FROM users LIMIT 10").Scan(&users)
-		return c.JSON(users)
-	})
-
-	log.Fatal(app.Listen(":3000")) // Vercel akan redirect PORT ke 3000
+}
+func Handler(w http.ResponseWriter, r *http.Request) {
+	adaptor.FiberApp(app)(w, r)
 }
